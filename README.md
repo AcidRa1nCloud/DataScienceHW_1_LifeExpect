@@ -39,4 +39,3 @@ This project is based on the [Life Expectancy (WHO) dataset](https://www.kaggle.
 This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute the code for educational and non-commercial purposes.
 
 ---
-*Note: Replace "your-username" with your actual GitHub username in the clone URL.*
