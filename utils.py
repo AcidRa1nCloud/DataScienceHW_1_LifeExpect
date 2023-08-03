@@ -6,6 +6,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import Image, display
+import models
 
 class RunningAverage():
     """
@@ -18,7 +19,7 @@ class RunningAverage():
         self.steps = 0
 
     def update(self, val):
-        self.total+=val 
+        self.total+=val
         self.steps+=1
 
     def __call__(self):
@@ -26,8 +27,8 @@ class RunningAverage():
 
 
 def train_val_split(
-    X: np.array, 
-    y: np.array, 
+    X: np.array,
+    y: np.array,
     train_split: int=70
     ):
     """
@@ -57,7 +58,7 @@ def set_logger(
     as a text file
 
     Args:
-        log_path: path to the log file 
+        log_path: path to the log file
     """
 
     logger = logging.getLogger()
@@ -76,8 +77,8 @@ def set_logger(
 
 
 def save_checkpoint(
-    state: dict, 
-    is_best: bool, 
+    state: dict,
+    is_best: bool,
     checkpoint: str
     ):
     """
@@ -101,7 +102,7 @@ def save_checkpoint(
 
 
 def load_checkpoint(
-    checkpoint: str, 
+    checkpoint: str,
     model: torch.nn.Module,
     optimizer: torch.optim=None
     ):
@@ -127,7 +128,7 @@ def load_checkpoint(
 
 
 def save_to_json(
-    dictionary: dict, 
+    dictionary: dict,
     json_path: str
     ):
     """
@@ -142,8 +143,9 @@ def save_to_json(
         dictionary = {k: float(v) for k, v in dictionary.items()}
         json.dump(dictionary, file, indent=4)
 
+
 def plot_results(
-    train_stats: np.array, 
+    train_stats: np.array,
     val_stats: np.array
     ):
     """
@@ -158,7 +160,7 @@ def plot_results(
     val_stats = {k: [dic[k] for dic in val_stats] for k in val_stats[0]}
 
     # Set subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
 
     # Plot first subplot
     ax1.plot(train_stats['loss'])
@@ -174,10 +176,33 @@ def plot_results(
 
     # Set second title and legend
     ax2.set_title('MSE')
-    ax2.legend(['Train', 'Validation'], loc='lower left')
+    ax2.legend(['Train', 'Validation'], loc='lower right')
 
     # Save image
     plt.savefig('plot.png')
 
-    # Show image
-    display(Image(filename='plot.png'))
+
+def model_select(
+    model_version: str
+    ):
+    """
+    Returns a model class object depending on the model model_version
+
+    Args:
+        model_version: name of the model
+    """
+    match model_version:
+        case 'V0':
+            return models.Model_V0
+        case 'V1':
+            return models.Model_V1
+        case 'V2':
+            return models.Model_V2
+        case _:
+            return models.Model_V0
+
+
+class EarlyStopping():
+    """
+    """
+    pass

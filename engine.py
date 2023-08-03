@@ -8,12 +8,12 @@ from utils import RunningAverage, load_checkpoint, save_checkpoint, save_to_json
 
 
 def train_step(
-    model: torch.nn.Module, 
-    dataloader: torch.utils.data.DataLoader, 
-    loss_fn: torch.nn.Module, 
-    optimizer: torch.optim.Optimizer, 
-    summ_step: int=SUMMARY_SS, 
-    metrics: dict=METRICS, 
+    model: torch.nn.Module,
+    dataloader: torch.utils.data.DataLoader,
+    loss_fn: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    summ_step: int=SUMMARY_SS,
+    metrics: dict=METRICS,
     device: torch.device=DEVICE
     ):
     """
@@ -53,18 +53,18 @@ def train_step(
 
         # Set new weights
         optimizer.step()
-    
-    # Updating summary list with metrics
-    if i % summ_step == 0:
-        logits = logits.data.cpu().numpy()
-        y = y.data.cpu().numpy()
-        # Loop and calculate metrics
-        summ = {metric: metrics[metric](logits, y) for metric in metrics}
-        summ['loss'] = loss.item()
-        summary.append(summ)
 
-    # Update average loss
-    loss_avg.update(loss.item())
+        # Updating summary list with metrics
+        if i % summ_step == 0:
+            logits = logits.data.cpu().numpy()
+            y = y.data.cpu().numpy()
+            # Loop and calculate metrics
+            summ = {metric: metrics[metric](logits, y) for metric in metrics}
+            summ['loss'] = loss.item()
+            summary.append(summ)
+
+        # Update average loss
+        loss_avg.update(loss.item())
 
 
     # Compute mean of all metrics in summary
@@ -74,10 +74,10 @@ def train_step(
     return metrics_mean
 
 def validation_step(
-    model: torch.nn.Module, 
-    dataloader: torch.utils.data.DataLoader, 
-    loss_fn: torch.nn.Module,  
-    metrics: dict=METRICS, 
+    model: torch.nn.Module,
+    dataloader: torch.utils.data.DataLoader,
+    loss_fn: torch.nn.Module,
+    metrics: dict=METRICS,
     device: torch.device=DEVICE
     ):
     """
@@ -132,12 +132,12 @@ def validation_step(
 
 
 def train(
-    model: torch.nn.Module, 
-    train_dataloader: torch.utils.data.DataLoader, 
-    valid_dataloader: torch.utils.data.DataLoader, 
-    loss_fn: torch.nn.Module, 
-    optimizer: torch.optim.Optimizer, 
-    summ_step: int=SUMMARY_SS, 
+    model: torch.nn.Module,
+    train_dataloader: torch.utils.data.DataLoader,
+    valid_dataloader: torch.utils.data.DataLoader,
+    loss_fn: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    summ_step: int=SUMMARY_SS,
     metrics: dict=METRICS,
     epochs: int=EPOCHS,
     restore_file: str=None,
@@ -158,7 +158,7 @@ def train(
         saving_path: a path were state dicts and json representation of them are saved
         device: type of the device data is stored at
     """
-    
+
     # Reloade weight from restore file if specified
     if restore_file is not None:
         restore_file = restore_file + 'pth.tar'
@@ -177,21 +177,21 @@ def train(
         logging.info(f"Epoch {epoch+1}/{epochs}")
 
         # Train
-        train_metrics = train_step(model, 
-                                   train_dataloader, 
-                                   loss_fn, 
-                                   optimizer, 
-                                   summ_step, 
-                                   metrics, 
+        train_metrics = train_step(model,
+                                   train_dataloader,
+                                   loss_fn,
+                                   optimizer,
+                                   summ_step,
+                                   metrics,
                                    device)
 
         # Eval
-        val_metrics = validation_step(model, 
-                                      valid_dataloader, 
-                                      loss_fn, 
-                                      metrics, 
+        val_metrics = validation_step(model,
+                                      valid_dataloader,
+                                      loss_fn,
+                                      metrics,
                                       device)
-        
+
         # Save the best score of the chosen metric
         val_acc = val_metrics['MSE']
         is_best = val_acc >= best_val_acc
@@ -202,7 +202,7 @@ def train(
                          'optim_dict': optimizer.state_dict()},
                         is_best=is_best,
                         checkpoint=SAVE_PATH)
-        
+
         # If best eval, best_save_path
         if is_best:
             logging.info("- Found new best accuracy")

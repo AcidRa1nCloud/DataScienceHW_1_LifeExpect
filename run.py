@@ -5,8 +5,8 @@ import logging
 import torch
 from torch.utils.data import DataLoader
 from params import *
-from utils import save_to_json, save_checkpoint, load_checkpoint, RunningAverage, set_logger, plot_results
-from models import Model_V0
+from utils import *
+from models import *
 from data import train_dataset, valid_dataset, test_dataset
 from engine import train
 
@@ -19,6 +19,8 @@ parser.add_argument('--in_units', help='Set in units', default=21, type=int)
 parser.add_argument('--hidden_units', help='Set hidden units', default=32, type=int)
 parser.add_argument('--out_units', help='Set out units', default=1, type=int)
 parser.add_argument('--sstep', help='Set summary step', default=1, type=int)
+parser.add_argument('-d', '--dropout', help='Set dropout probability', default=0.5, type=float)
+parser.add_argument('-m', '--model', help='Choose the model', default='V0', type=str, choices=['V0', 'V1', 'V2'])
 args = parser.parse_args()
 
 EPOCHS = args.epochs
@@ -38,7 +40,8 @@ set_logger(SAVE_PATH / 'train.log')
 
 # Instanciate model
 logging.info("Model instance")
-model = Model_V0(in_units=args.in_units, hidden_units=args.hidden_units, out_units=args.out_units).to(DEVICE)
+model_v = model_select(args.model)
+model = model_v(in_units=args.in_units, hidden_units=args.hidden_units, out_units=args.out_units, dropout_prob=args.dropout).to(DEVICE)
 
 # Set loss function and optimizer
 logging.info("Set loss function")
@@ -48,14 +51,14 @@ optimizer = OPTIM(params=model.parameters(), lr=args.lr)
 
 # Create dataloaders
 logging.info("Loading the datasets...")
-train_dataloader = DataLoader(train_dataset, 
-                              batch_size=BATCH_SIZE, 
-                              num_workers=NUM_WORKERS, 
+train_dataloader = DataLoader(train_dataset,
+                              batch_size=BATCH_SIZE,
+                              num_workers=NUM_WORKERS,
                               shuffle=True)
 
-valid_dataloader = DataLoader(valid_dataset, 
-                              batch_size=BATCH_SIZE, 
-                              num_workers=NUM_WORKERS, 
+valid_dataloader = DataLoader(valid_dataset,
+                              batch_size=BATCH_SIZE,
+                              num_workers=NUM_WORKERS,
                               shuffle=False)
 
 logging.info("- all done.")
@@ -63,12 +66,12 @@ logging.info("- all done.")
 # Train the model
 logging.info(f"Start training for {EPOCHS} epoch(s)")
 train_stats, val_stats = train(
-    model=model, 
-    train_dataloader=train_dataloader, 
-    valid_dataloader=valid_dataloader, 
-    loss_fn=loss_fn, 
-    optimizer=optimizer, 
-    summ_step=SUMMARY_SS, 
+    model=model,
+    train_dataloader=train_dataloader,
+    valid_dataloader=valid_dataloader,
+    loss_fn=loss_fn,
+    optimizer=optimizer,
+    summ_step=SUMMARY_SS,
     metrics=METRICS,
     epochs=EPOCHS,
     restore_file=None,
